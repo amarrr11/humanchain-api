@@ -61,6 +61,17 @@ Server will start at `http://localhost:5000`.
 
 ---
 
+## 🗃️ Pre-populated Data
+The database will initially have 2-3 sample incidents, like:
+
+FIRST AI Incident
+
+SECOND AI Incident
+
+THIRD AI Incident
+
+(These can be created manually by hitting the POST endpoint after setup.)
+
 ## 📦 API Endpoints
 
 All responses are in JSON format.
