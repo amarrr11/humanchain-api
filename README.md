@@ -85,7 +85,6 @@ Also a logger file will contain all the logs of every command.
     "severity": "Low",
     "reported_at": "2025-04-26T10:15:33.000Z"
   },
-  ...
 ]
 ```
 
