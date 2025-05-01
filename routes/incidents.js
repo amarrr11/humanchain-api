@@ -1,4 +1,4 @@
-// routes/incidents.js
+
 const express = require('express');
 const router = express.Router();
 const Incident = require('../models/Incident');

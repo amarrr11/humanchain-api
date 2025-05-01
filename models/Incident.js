@@ -1,4 +1,4 @@
-// models/incident.js
+
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');  // Database connection file
 
@@ -27,7 +27,7 @@ const Incident = sequelize.define('Incident', {
   }
 }, {
   tableName: 'incidents', // Table name in the DB
-  timestamps: false      // No automatic timestamps like createdAt, updatedAt
+  timestamps: false      
 });
 
 module.exports = Incident;

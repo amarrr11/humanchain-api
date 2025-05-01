@@ -1,4 +1,4 @@
-// 1. Basic setup
+// Basic setup
 const express = require('express');           // Server setup
 const dotenv = require('dotenv');              // Environment variables
 const { Sequelize } = require('sequelize');    // Database connection
@@ -10,38 +10,38 @@ const rateLimit = require('express-rate-limit'); // Rate limiter
 
 const app = express();    // Express server instance
 
-// 2. Environment Variables
+// Environment Variables
 dotenv.config();
 
-// 3. Morgan Logging
+// Morgan Logging
 const accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs', 'access.log'), { flags: 'a' });
 app.use(morgan('combined', { stream: accessLogStream }));
 
-// 4. Body Parsing
+// Body Parsing
 app.use(express.json());
 
-// 5. Rate Limiting
-const limiter = rateLimit({
+// Rate Limiting
+const limiter = rateLimit({ 
   windowMs: 1 * 60 * 1000, // 1 min
   max: 100,
 });
 app.use(limiter);
 
-// 6. Database Connection
+// Database Connection
 const sequelize = new Sequelize(process.env.DB_URL);
 sequelize.authenticate()
   .then(() => console.log("Database connected successfully"))
   .catch((err) => console.log("Error: " + err));
 
-// 7. Routes
+// Routes
 app.use(incidentRoutes);
 
-// 8. Test Route
+// Test Route
 app.get('/', (req, res) => {
   res.send('HumanChain API is running...');
 });
 
-// 9. Start Server
+// Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
