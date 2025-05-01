@@ -225,5 +225,6 @@ Yeh updated **README.md** ka extra part hai (sirf jo PUT ke liye hai):
 
 - Can add pagination if the number of incidents are so many then we actually give the data in chunks so the load in the server will be minimal.
 - Soft delete : Rather than permanently deleting records, we can implement a soft delete where the data remains in the database but is marked as deleted (e.g., a deleted_at timestamp).
-
+- Add email notification functionality: If an incident with "severity": "High" is logged, an automated alert email using Node.js + Nodemailer package can be sent to the admin or concerned team for immediate action.
+  
 ---
