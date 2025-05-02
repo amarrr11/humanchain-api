@@ -228,3 +228,6 @@ Yeh updated **README.md** ka extra part hai (sirf jo PUT ke liye hai):
 - Add email notification functionality: If an incident with "severity": "High" is logged, an automated alert email using Node.js + Nodemailer package can be sent to the admin or concerned team for immediate action.
   
 ---
+
+### 💡 Contributing
+Contributions are welcome! Check out the `good first issue` section or open a new one.
