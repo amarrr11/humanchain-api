@@ -88,26 +88,34 @@ router.put('/incidents/:id', async (req, res) => {
   const { title, description, severity } = req.body;
 
   if (isNaN(id)) {
-    return res.status(400).json({ error: 'Invalid ID format' }); // 400 Bad Request - Invalid ID format
+    return res.status(400).json({ error: 'Invalid ID format' }); // 400 Bad Request
+  }
+
+  const validSeverities = ['Low', 'Medium', 'High'];
+  if (severity && !validSeverities.includes(severity)) {
+    return res.status(400).json({ error: 'Invalid severity value. Valid values are: Low, Medium, High.' });
   }
 
   try {
     const incident = await Incident.findByPk(id);
+
     if (!incident) {
-      return res.status(404).json({ error: 'Incident not found' }); // 404 Not Found - Incident not found
+      return res.status(404).json({ error: 'Incident not found' }); // 404 Not Found
     }
 
-    incident.title = title || incident.title;
-    incident.description = description || incident.description;
-    incident.severity = severity || incident.severity;
+    // Apply partial updates if provided
+    if (title) incident.title = title;
+    if (description) incident.description = description;
+    if (severity) incident.severity = severity;
 
     await incident.save();
 
-    res.status(200).json(incident); // 200 OK - Incident updated
+    res.status(200).json(incident); // 200 OK
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Unable to update incident' }); // 500 Internal Server Error
   }
 });
+
 
 module.exports = router;
