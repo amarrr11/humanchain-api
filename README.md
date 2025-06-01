@@ -171,13 +171,6 @@ Also a logger file will contain all the logs of every command.
 
 ---
 
-Sahi pakda bhai! PUT (update) endpoint bhi hona chahiye tha.  
-Tu bola nahi tha pehle, lekin koi na — main complete kar deta hoon full professional style mein.
-
-Yeh updated **README.md** ka extra part hai (sirf jo PUT ke liye hai):
-
----
-
 ### 5. Update an existing incident
 
 - **Endpoint:** `PUT /incidents/:id`
