@@ -1,10 +1,9 @@
-// Incident routes with JWT authentication protection
 const express = require('express');
 const router = express.Router();
 const Incident = require('../models/Incident');
 const { authenticateToken, requireAdmin, optionalAuth } = require('../middleware/auth');
 
-// GET /incidents - Get all incidents (public access)
+// GET /incidents - Get all incidents
 router.get('/', optionalAuth, async (req, res) => {
   try {
     const incidents = await Incident.findAll({
@@ -27,7 +26,7 @@ router.get('/', optionalAuth, async (req, res) => {
   }
 });
 
-// POST /incidents - Create new incident (requires auth)
+// POST /incidents - Create new incident
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const { title, description, severity } = req.body;
@@ -63,7 +62,7 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-// GET /incidents/:id - Get specific incident (public access)
+// GET /incidents/:id - Get specific incident
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -96,7 +95,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
   }
 });
 
-// PUT /incidents/:id - Update incident (requires auth)
+// PUT /incidents/:id - Update incident
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -140,7 +139,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// DELETE /incidents/:id - Delete incident (requires admin)
+// DELETE /incidents/:id - Delete incident (admin only)
 router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;

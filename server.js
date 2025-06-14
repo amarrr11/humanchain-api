@@ -1,4 +1,3 @@
-// Enhanced server setup with JWT authentication
 const express = require('express');
 const dotenv = require('dotenv');
 const { Sequelize } = require('sequelize');
@@ -10,7 +9,6 @@ const path = require('path');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
-
 dotenv.config();
 
 // Validate JWT_SECRET
@@ -39,21 +37,19 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rate limiting
 const limiter = rateLimit({ 
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 100, // 100 requests per minute
+  windowMs: 1 * 60 * 1000,
+  max: 100,
   message: {
     error: 'Too many requests from this IP, please try again later.',
     retryAfter: '1 minute'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
+  }
 });
 app.use(limiter);
 
 // Auth rate limiting
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts per 15 minutes
+  windowMs: 15 * 60 * 1000,
+  max: 5,
   message: {
     error: 'Too many authentication attempts, please try again later.',
     retryAfter: '15 minutes'
@@ -100,31 +96,16 @@ app.use((req, res, next) => {
   }
 });
 
-// Route registration - FIXED PATHS
-app.use('/auth', authLimiter, authRoutes);  // Auth routes with rate limiting
-app.use('/incidents', incidentRoutes);      // Incident routes
+// Routes
+app.use('/auth', authLimiter, authRoutes);
+app.use('/incidents', incidentRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
     message: 'HumanChain AI Safety Incident Log API',
     version: '2.0.0',
-    status: 'running',
-    endpoints: {
-      auth: {
-        register: 'POST /auth/register',
-        login: 'POST /auth/login',
-        profile: 'GET /auth/profile',
-        logout: 'POST /auth/logout'
-      },
-      incidents: {
-        list: 'GET /incidents',
-        create: 'POST /incidents',
-        get: 'GET /incidents/:id',
-        update: 'PUT /incidents/:id',
-        delete: 'DELETE /incidents/:id'
-      }
-    }
+    status: 'running'
   });
 });
 
