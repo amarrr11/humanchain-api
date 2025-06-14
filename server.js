@@ -1,24 +1,22 @@
 // Enhanced server setup with JWT authentication
-const express = require('express');           // Server setup
-const dotenv = require('dotenv');              // Environment variables
-const { Sequelize } = require('sequelize');    // Database connection
-const incidentRoutes = require('./routes/incidents'); // Incident routes
-const authRoutes = require('./routes/auth');   // Authentication routes
-const morgan = require('morgan');              // HTTP request logger
-const fs = require('fs');                      // File system operations
-const path = require('path');                  // File path utilities
-const rateLimit = require('express-rate-limit'); // Rate limiting middleware
+const express = require('express');
+const dotenv = require('dotenv');
+const { Sequelize } = require('sequelize');
+const incidentRoutes = require('./routes/incidents');
+const authRoutes = require('./routes/auth');
+const morgan = require('morgan');
+const fs = require('fs');
+const path = require('path');
+const rateLimit = require('express-rate-limit');
 
-const app = express();    // Express server instance
+const app = express();
 
-// Load environment variables from .env file
 dotenv.config();
 
-// Validate required environment variables
+// Validate JWT_SECRET
 if (!process.env.JWT_SECRET) {
   console.error('ERROR: JWT_SECRET environment variable is required!');
-  console.error('Please add JWT_SECRET to your .env file');
-  process.exit(1); // Exit if JWT_SECRET is not set
+  process.exit(1);
 }
 
 // Ensure logs directory exists
@@ -27,84 +25,74 @@ if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
-// Morgan HTTP request logging
-// Creates/appends to access.log file with detailed request information
+// HTTP request logging
 const accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs', 'access.log'), { flags: 'a' });
 app.use(morgan('combined', { stream: accessLogStream }));
 
-// Also log to console in development
 if (process.env.NODE_ENV !== 'production') {
-  app.use(morgan('dev')); // Colored, concise output for development
+  app.use(morgan('dev'));
 }
 
 // Body parsing middleware
-// Enables parsing of JSON request bodies
-app.use(express.json({ limit: '10mb' })); // Limit request body size
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
 
-// Rate limiting middleware
-// Prevents abuse by limiting requests per IP address
+// Rate limiting
 const limiter = rateLimit({ 
-  windowMs: 1 * 60 * 1000, // 1 minute window
-  max: 100, // Maximum 100 requests per minute per IP
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 100, // 100 requests per minute
   message: {
     error: 'Too many requests from this IP, please try again later.',
     retryAfter: '1 minute'
   },
-  standardHeaders: true, // Return rate limit info in headers
-  legacyHeaders: false, // Disable legacy headers
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 app.use(limiter);
 
-// Stricter rate limiting for authentication endpoints
+// Auth rate limiting
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Maximum 5 login/register attempts per 15 minutes
+  max: 5, // 5 attempts per 15 minutes
   message: {
     error: 'Too many authentication attempts, please try again later.',
     retryAfter: '15 minutes'
   },
-  skipSuccessfulRequests: true, // Don't count successful requests
+  skipSuccessfulRequests: true,
 });
 
-// Apply stricter rate limiting to auth routes
-app.use('/auth', authLimiter);
-
-// Database connection and synchronization
+// Database connection
 const sequelize = new Sequelize(process.env.DB_URL, {
   dialect: 'mysql',
-  logging: false, // Disable SQL query logging (set to console.log to enable)
+  logging: false,
   pool: {
-    max: 5,      // Maximum number of connections
-    min: 0,      // Minimum number of connections
-    acquire: 30000, // Maximum time to get connection (ms)
-    idle: 10000  // Maximum time connection can be idle (ms)
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
   }
 });
 
-// Test database connection and sync models
+// Test database connection
 sequelize.authenticate()
   .then(() => {
     console.log("✅ Database connected successfully");
-    
-    // Sync database models (create tables if they don't exist)
-    return sequelize.sync({ alter: false }); // Set to true to update existing tables
+    return sequelize.sync({ alter: false });
   })
   .then(() => {
     console.log("✅ Database models synchronized");
   })
   .catch((err) => {
     console.error("❌ Database connection error:", err);
-    process.exit(1); // Exit if database connection fails
+    process.exit(1);
   });
 
-// CORS middleware (if needed for frontend integration)
+// CORS middleware
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*'); // Allow all origins (configure for production)
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   
-  // Handle preflight requests
   if (req.method === 'OPTIONS') {
     res.sendStatus(200);
   } else {
@@ -112,41 +100,35 @@ app.use((req, res, next) => {
   }
 });
 
-// Route registration
-app.use(authRoutes);      // Authentication routes (/auth/*)
-app.use(incidentRoutes);  // Incident management routes (/incidents/*)
+// Route registration - FIXED PATHS
+app.use('/auth', authLimiter, authRoutes);  // Auth routes with rate limiting
+app.use('/incidents', incidentRoutes);      // Incident routes
 
-// Root endpoint - API status
+// Root endpoint
 app.get('/', (req, res) => {
   res.json({
     message: 'HumanChain AI Safety Incident Log API',
     version: '2.0.0',
     status: 'running',
-    features: [
-      'JWT Authentication',
-      'Incident Management',
-      'Rate Limiting',
-      'Request Logging'
-    ],
     endpoints: {
       auth: {
         register: 'POST /auth/register',
         login: 'POST /auth/login',
-        profile: 'GET /auth/profile (requires token)',
-        logout: 'POST /auth/logout (requires token)'
+        profile: 'GET /auth/profile',
+        logout: 'POST /auth/logout'
       },
       incidents: {
         list: 'GET /incidents',
-        create: 'POST /incidents (requires token)',
+        create: 'POST /incidents',
         get: 'GET /incidents/:id',
-        update: 'PUT /incidents/:id (requires token)',
-        delete: 'DELETE /incidents/:id (requires admin token)'
+        update: 'PUT /incidents/:id',
+        delete: 'DELETE /incidents/:id'
       }
     }
   });
 });
 
-// Health check endpoint
+// Health check
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'healthy',
@@ -155,7 +137,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// 404 handler for undefined routes
+// 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({
     error: 'Route not found',
@@ -167,7 +149,6 @@ app.use('*', (req, res) => {
 app.use((error, req, res, next) => {
   console.error('Global error handler:', error);
   
-  // Don't leak error details in production
   const isDevelopment = process.env.NODE_ENV !== 'production';
   
   res.status(error.status || 500).json({
@@ -181,12 +162,10 @@ app.use((error, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📝 Access logs: ${path.join(__dirname, 'logs', 'access.log')}`);
   console.log(`🔐 JWT Authentication enabled`);
-  console.log(`⚡ Rate limiting: 100 requests/minute, 5 auth attempts/15 minutes`);
 });
 
-// Graceful shutdown handling
+// Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully');
   sequelize.close().then(() => {
