@@ -1,7 +1,12 @@
+//routes/incidents.js
 
 const express = require('express');
 const router = express.Router();
-const Incident = require('../models/Incident');
+const authenticateToken = require('../middleware/authMiddleware');
+const Incident = require('../models/incident');
+
+// ✅ Protect all routes
+router.use(authenticateToken);
 
 // 1. GET /incidents: Get all incidents
 router.get('/incidents', async (req, res) => {

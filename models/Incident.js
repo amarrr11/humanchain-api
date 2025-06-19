@@ -1,4 +1,4 @@
-
+// models/Incident.js
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');  // Database connection file
 

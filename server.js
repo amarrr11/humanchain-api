@@ -1,48 +1,58 @@
 // Basic setup
-const express = require('express');           // Server setup
-const dotenv = require('dotenv');              // Environment variables
-const { Sequelize } = require('sequelize');    // Database connection
-const incidentRoutes = require('./routes/incidents'); // Routes import
-const morgan = require('morgan');              // Logger
-const fs = require('fs');                      // File system
-const path = require('path');                  // File path handle
-const rateLimit = require('express-rate-limit'); // Rate limiter
+const express = require('express');                  // Server setup
+const dotenv = require('dotenv');                    // Environment variables
+const incidentRoutes = require('./routes/incidents'); // Incident Routes
+const authRoutes = require('./routes/auth');         // Auth Routes
+const morgan = require('morgan');                    // Logger
+const fs = require('fs');                            // File system
+const path = require('path');                        // Path handling
+const rateLimit = require('express-rate-limit');     // Rate limiter
+const sequelize = require('./config/database');      // ✅ Import shared sequelize instance
+require('./models/user');                            // ✅ Register User model
 
-const app = express();    // Express server instance
+const app = express(); // Express server instance
 
-// Environment Variables
+// Load environment variables
 dotenv.config();
 
-// Morgan Logging
-const accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs', 'access.log'), { flags: 'a' });
+// Create log stream for morgan
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, 'logs', 'access.log'),
+  { flags: 'a' }
+);
 app.use(morgan('combined', { stream: accessLogStream }));
 
-// Body Parsing
+// Body parser middleware
 app.use(express.json());
 
-// Rate Limiting
-const limiter = rateLimit({ 
-  windowMs: 1 * 60 * 1000, // 1 min
+// Rate limiter middleware
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
   max: 100,
 });
 app.use(limiter);
 
-// Database Connection
-const sequelize = new Sequelize(process.env.DB_URL);
+// Authenticate DB connection
 sequelize.authenticate()
-  .then(() => console.log("Database connected successfully"))
-  .catch((err) => console.log("Error: " + err));
+  .then(() => console.log("✅ Database connected successfully"))
+  .catch((err) => console.error("❌ DB Connection Error:", err));
+
+// Sync models (auto-create table)
+sequelize.sync({ alter: true })
+  .then(() => console.log('✅ Models synced'))
+  .catch(err => console.error('❌ Model Sync Error:', err));
 
 // Routes
-app.use(incidentRoutes);
+app.use(authRoutes);       // /register, /login
+app.use(incidentRoutes);   // /incidents CRUD
 
-// Test Route
+// Health route
 app.get('/', (req, res) => {
-  res.send('HumanChain API is running...');
+  res.send('🚀 HumanChain API is running...');
 });
 
-// Start Server
+// Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🌐 Server running on http://localhost:${PORT}`);
 });
