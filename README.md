@@ -20,12 +20,16 @@ It supports full **CRUD operations** for incidents with **JWT-based authenticati
 
 ### 1. Clone the Repository
 
+```bash
 git clone <your-repo-link>
 cd humanchain-api
+```
 
 ### 2. Install Dependencies
 
+```bash
 npm install
+```
 
 ### 3. Setup Environment Variables
 
@@ -46,7 +50,9 @@ JWT_SECRET=your_super_secret_jwt_key
 1. Open MySQL Workbench or CLI.
 2. Create the database:
 
+```sql
 CREATE DATABASE human_db;
+```
 
 > ✅ Sequelize will automatically create the required tables (`users`, `incidents`) on server start due to `sequelize.sync({ alter: true })`.
 
@@ -54,11 +60,15 @@ CREATE DATABASE human_db;
 
 ### 5. Run the Server
 
+```bash
 npm run dev
+```
 
 or
 
+```bash
 node server.js
+```
 
 > 🌐 Server starts at `http://localhost:5000`
 
@@ -71,7 +81,7 @@ node server.js
 * **POST** `/register`
 * **Request Body:**
 
-```
+```json
 {
   "name": "Shiv",
   "email": "shiv@gmail.com",
@@ -84,7 +94,7 @@ node server.js
 * **POST** `/login`
 * **Request Body:**
 
-```
+```json
 {
   "email": "shiv@gmail.com",
   "password": "123456"
@@ -93,13 +103,14 @@ node server.js
 
 * **Response:**
 
-```
+```json
 {
   "token": "JWT_TOKEN_HERE"
 }
 ```
 
-> 🔐 Use this token in `Authorization` header as: `Authorization: Bearer <token>`
+> 🔐 Use this token in `Authorization` header as:
+> `Authorization: Bearer <token>`
 
 ---
 
@@ -116,7 +127,7 @@ node server.js
 * **POST** `/incidents`
 * **Request Body:**
 
-```
+```json
 {
   "title": "AI Model Bias Detected",
   "description": "Recommendation system showed biased results",
@@ -133,7 +144,7 @@ node server.js
 * **PUT** `/incidents/:id`
 * **Request Body:**
 
-```
+```json
 {
   "title": "Updated Title",
   "severity": "Medium"
@@ -161,10 +172,10 @@ Value:  Bearer <your_jwt_token>
 
 #### ✅ Register:
 
+```http
 POST /register
 Content-Type: application/json
 
-```
 {
   "name": "amarnath",
   "email": "shiv@gmail.com",
@@ -174,10 +185,10 @@ Content-Type: application/json
 
 #### ✅ Login:
 
+```http
 POST /login
 Content-Type: application/json
 
-```
 {
   "email": "shiv@gmail.com",
   "password": "123456"
@@ -186,11 +197,11 @@ Content-Type: application/json
 
 #### ✅ Add Incident:
 
+```http
 POST /incidents
 Authorization: Bearer <token>
 Content-Type: application/json
 
-```
 {
   "title": "Test Incident",
   "description": "Some test description",
@@ -210,4 +221,4 @@ Content-Type: application/json
 
 ## 💡 Contribution
 
-Contributions are welcome! Feel free to open PRs or issues for bug reports, suggestions, or improvements. 
+Contributions are welcome! Feel free to open PRs or issues for bug reports, suggestions, or improvements.
