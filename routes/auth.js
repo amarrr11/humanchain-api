@@ -26,8 +26,8 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
-    // res.status(500).json({ error: 'Registration failed' });
     console.log(err);
+    res.status(500).json({ error: 'Registration failed' });
   }
 });
 
@@ -35,14 +35,24 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) return res.status(400).json({ error: 'Missing credentials' });
+  console.log('Received Email:', email);
+  console.log('Received Password:', password);
+
+  if (!email || !password)
+    return res.status(400).json({ error: 'Missing credentials' });
 
   try {
     const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    console.log('User from DB:', user);
+
+    if (!user)
+      return res.status(404).json({ error: 'User not found' });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ error: 'Invalid password' });
+    console.log('Password Match:', isMatch);
+
+    if (!isMatch)
+      return res.status(401).json({ error: 'Invalid password' });
 
     const token = jwt.sign(
       { id: user.id, email: user.email },
@@ -50,10 +60,14 @@ router.post('/login', async (req, res) => {
       { expiresIn: '1h' }
     );
 
+    console.log('Generated Token:', token);
+
     res.json({ token });
   } catch (err) {
+    console.error('Login Error:', err);
     res.status(500).json({ error: 'Login failed' });
   }
 });
+
 
 module.exports = router;

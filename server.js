@@ -43,8 +43,8 @@ sequelize.sync({ alter: true })
   .catch(err => console.error('❌ Model Sync Error:', err));
 
 // Routes
-app.use(authRoutes);       // /register, /login
-app.use(incidentRoutes);   // /incidents CRUD
+app.use('/', authRoutes);         // handles /register, /login
+app.use('/', incidentRoutes);
 
 // Health route
 app.get('/', (req, res) => {
